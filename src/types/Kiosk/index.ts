@@ -1,0 +1,23 @@
+export type Kiosk = {
+  "@id": string;
+  "@type": string;
+  id: number;
+  slug: string;
+  registrationMode: string;
+  loginMode: string;
+  autoRenewAccountOnNewCode: boolean;
+  enableAccount: boolean;
+  subDomain: string;
+  domain: string;
+  countDaysBeforeAccountExpires: null | number;
+  enabled: boolean;
+  enabledForApplication: boolean;
+  name: string;
+  color: string;
+  lastUpdate: string;
+  grantAllIps: boolean;
+  uuid: string;
+  logo: null | string;
+  availableIps: string[];
+  url: string;
+};
