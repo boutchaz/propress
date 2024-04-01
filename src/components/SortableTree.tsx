@@ -51,8 +51,7 @@ const initialItems: TreeItems = [
     children: [
       {
         id: "Module 1",
-        children: [
-        ],
+        children: [],
       },
     ],
   },
@@ -94,7 +93,6 @@ export function SortableTree({
   removable,
 }: Props) {
   const [items, setItems] = useState(() => defaultItems);
-  console.log({ items });
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -245,25 +243,79 @@ export function SortableTree({
   function handleDragOver({ over }: DragOverEvent) {
     setOverId(over?.id ?? null);
   }
+  // free logic for drag end
+  // function handleDragEnd({ active, over }: DragEndEvent) {
+  //   resetState();
 
+  //   if (projected && over) {
+  //     const { depth, parentId } = projected;
+  //     const clonedItems: FlattenedItem[] = JSON.parse(
+  //       JSON.stringify(flattenTree(items))
+  //     );
+  //     const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
+  //     const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
+  //     const activeTreeItem = clonedItems[activeIndex];
+
+  //     clonedItems[activeIndex] = { ...activeTreeItem, depth, parentId };
+
+  //     const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
+  //     const newItems = buildTree(sortedItems);
+
+  //     setItems(newItems);
+  //   }
+  // }
+  // limit for adjecents only
   function handleDragEnd({ active, over }: DragEndEvent) {
     resetState();
 
-    if (projected && over) {
-      const { depth, parentId } = projected;
-      const clonedItems: FlattenedItem[] = JSON.parse(
-        JSON.stringify(flattenTree(items))
-      );
-      const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
-      const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
-      const activeTreeItem = clonedItems[activeIndex];
+    if (!over || !projected) {
+      // If there's no target position or projection data, exit early
+      return;
+    }
 
-      clonedItems[activeIndex] = { ...activeTreeItem, depth, parentId };
+    const clonedItems: FlattenedItem[] = JSON.parse(
+      JSON.stringify(flattenTree(items))
+    );
+    const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
+    const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
 
+    if (overIndex === -1 || activeIndex === -1) {
+      // If either the active or over items aren't found, exit early
+      return;
+    }
+
+    const activeTreeItem = clonedItems[activeIndex];
+    const overTreeItem = clonedItems[overIndex];
+
+    // Ensure active and over items are at the same depth and have the same parentId
+    if (
+      activeTreeItem.depth === overTreeItem.depth &&
+      activeTreeItem.parentId === overTreeItem.parentId
+    ) {
+      // Update the active item's position to the over item's position
       const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
+      // Rebuild the tree structure with the newly sorted items
       const newItems = buildTree(sortedItems);
-
+      if (activeTreeItem.depth == 0) {
+        const demo = newItems
+          .map((item: any, index: number) => {
+            return {
+              position: index,
+              id: item.uuid,
+              name: item.id,
+            };
+          })
+          .sort((a: any, b: any) => a.position - b.position);
+        console.log(demo);
+      }
+      console.log(newItems);
+      // Update the state with the new items array
       setItems(newItems);
+    } else {
+      // Log or handle the case where the drag-and-drop operation is not allowed
+      console.log(
+        "Drag and drop operation is not allowed. Items must be on the same level and under the same parent."
+      );
     }
   }
 

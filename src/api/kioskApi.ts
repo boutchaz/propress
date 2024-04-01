@@ -1,6 +1,4 @@
 import { API } from "@/api/instance";
-import { AuthState, AUTH_STATE_KEY } from "@/contexts/AuthContext";
-import localForage from "localforage";
 import config from "@/config";
 import { parseHydraResponse } from "@/hooks/parseHydraResponse";
 import { Kiosk } from "@/types/Kiosk";
@@ -11,31 +9,19 @@ export default {
     return response.data;
   },
   getKiosks: async (pageParam: number) => {
-    const authState = await localForage.getItem<AuthState>(AUTH_STATE_KEY);
     const response = await API.get<Kiosk[]>(
-      `${config.apiBaseUrl}/kiosks?page=${pageParam}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authState?.token}`,
-        },
-      }
+      `${config.apiBaseUrl}/kiosks?page=${pageParam}`
     );
     return parseHydraResponse(response.data);
   },
-  getKiosksSections: async (pageParam: number) => {
-    const response = await fetch(
-      `${config.apiBaseUrl}/kiosk/sections?pagination=true&page${pageParam}`
+  getKiosksSections: async (kioskId: string) => {
+    const response = await API.get(
+      `${config.apiBaseUrl}/kiosks/${kioskId}/sections`
     );
-    const data = await response.json();
-    return parseHydraResponse(data);
+    return parseHydraResponse(response.data);
   },
   getKioskItems: async (kioskId: string) => {
-    const authState = await localForage.getItem<AuthState>(AUTH_STATE_KEY);
-    const response = await API.get(`/kiosk_sections/${kioskId}/items`, {
-      headers: {
-        Authorization: `Bearer ${authState?.token}`,
-      },
-    });
+    const response = await API.get(`/kiosk_sections/${kioskId}/items`);
     return response.data;
   },
 };

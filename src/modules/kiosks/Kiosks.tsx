@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import useKiosks from "@/hooks/useKiosks";
 import { Kiosk } from "@/types/Kiosk";
-import { FilePenLine, Trash2 } from "lucide-react";
+import { Eye, Trash } from "lucide-react";
 import {
   createColumnHelper,
   flexRender,
@@ -13,14 +13,14 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@tanstack/react-router";
+import KioskSections from "@/components/kiosk-sections/KioskSections";
 
 type KioskRow = Pick<Kiosk, "id" | "name" | "color" | "lastUpdate">;
 const columnHelper = createColumnHelper<KioskRow>();
@@ -50,8 +50,8 @@ const columns = [
 const Kiosks = () => {
   const { result, hasNextPage, fetchNextPage } = useKiosks();
   const [data, _setData] = useState(() => []);
+  const [expandedRowId, setExpandedRowId] = useState<any>(null); // New state to track expanded row
   const router = useRouter();
-
   useEffect(() => {
     if (result) {
       const flattenedData = (result as any).pages.flatMap(
@@ -88,35 +88,52 @@ const Kiosks = () => {
                         )}
                   </TableHead>
                 ))}
-                <TableHead>Actions</TableHead>
+                <TableHead className="flex justify-center items-center">
+                  Actions
+                </TableHead>
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              <>
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell className="flex gap-2 justify-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        router.navigate({
+                          to: `/kiosks/${row.original?.id}`,
+                        });
+                      }}
+                    >
+                      {/* {row.original} */}
+                      <Eye />
+                    </Button>
+                    <Button variant="ghost">
+                      <Trash />
+                    </Button>
                   </TableCell>
-                ))}
-                <TableCell className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      router.navigate({
-                        to: `/kiosks/${row.original?.id}`,
-                      });
-                    }}
-                  >
-                    {/* {row.original} */}
-                    <FilePenLine />
-                  </Button>
-                  <Button variant="ghost" onClick={() => {}}>
-                    <Trash2 />
-                  </Button>
-                </TableCell>
-              </TableRow>
+                </TableRow>
+                {expandedRowId && expandedRowId.raw === row.id && (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      {/* Here you render your edit form or any other details for the row */}
+                      {/* Assuming an EditForm component that takes a kiosk object as prop */}
+                      {/* <EditForm kiosk={row.original} onSave={() => setExpandedRowId(null)} /> */}
+                      <KioskSections kioskId={expandedRowId.id} />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             ))}
           </TableBody>
           {/* <TableFooter>

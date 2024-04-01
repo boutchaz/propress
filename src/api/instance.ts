@@ -80,7 +80,6 @@ const onErrorResponse = async (error: AxiosError) => {
         // if we couldn't refresh we clear the storage and ask user to login again
         try {
           await localForage.removeItem(AUTH_STATE_KEY); // Clear authState from localForage on logout
-
         } catch (err) {
           console.warn("Tokens could not be deleted!");
         } finally {
@@ -103,7 +102,11 @@ const onErrorResponse = async (error: AxiosError) => {
   return Promise.reject(error);
 };
 
-API.interceptors.request.use(onRequest, onErrorRequest);
+API.interceptors.request.use(async function (config) {
+  // Do something before request is sent
+  const newConfig: any = await onRequest(config);
+  return newConfig;
+}, onErrorRequest);
 API.interceptors.response.use(
   function (response) {
     return response;

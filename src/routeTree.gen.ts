@@ -15,8 +15,8 @@ import { Route as TreeImport } from './routes/tree'
 import { Route as KiosksImport } from './routes/kiosks'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
-import { Route as KiosksIndexImport } from './routes/kiosks/index'
-import { Route as KiosksKioskIdImport } from './routes/kiosks/$kioskId'
+import { Route as KiosksIndexImport } from './routes/kiosks.index'
+import { Route as KiosksKiosIdImport } from './routes/kiosks.$kiosId'
 import { Route as AuthSigninImport } from './routes/auth/signin'
 
 // Create/Update Routes
@@ -46,8 +46,8 @@ const KiosksIndexRoute = KiosksIndexImport.update({
   getParentRoute: () => KiosksRoute,
 } as any)
 
-const KiosksKioskIdRoute = KiosksKioskIdImport.update({
-  path: '/$kioskId',
+const KiosksKiosIdRoute = KiosksKiosIdImport.update({
+  path: '/$kiosId',
   getParentRoute: () => KiosksRoute,
 } as any)
 
@@ -80,8 +80,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninImport
       parentRoute: typeof rootRoute
     }
-    '/kiosks/$kioskId': {
-      preLoaderRoute: typeof KiosksKioskIdImport
+    '/kiosks/$kiosId': {
+      preLoaderRoute: typeof KiosksKiosIdImport
       parentRoute: typeof KiosksImport
     }
     '/kiosks/': {
@@ -96,7 +96,7 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   AboutRoute,
-  KiosksRoute.addChildren([KiosksKioskIdRoute, KiosksIndexRoute]),
+  KiosksRoute.addChildren([KiosksKiosIdRoute, KiosksIndexRoute]),
   TreeRoute,
   AuthSigninRoute,
 ])

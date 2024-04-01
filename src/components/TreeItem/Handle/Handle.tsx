@@ -1,6 +1,5 @@
-import React from 'react';
 
-import {Action, ActionProps} from '../Action';
+import { Action, ActionProps } from '../Action';
 
 export function Handle(props: ActionProps) {
   return (

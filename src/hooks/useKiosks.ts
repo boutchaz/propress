@@ -9,10 +9,14 @@ type ApiResponse = {
       page?: string;
     };
   };
-  data: Kiosk[];
+  data: any;
 };
 
-const useKiosks = () => {
+const useKiosks = ({
+  composed = false,
+}: {
+  composed?: boolean;
+} = {}) => {
   const {
     fetchNextPage,
     fetchPreviousPage,
@@ -23,25 +27,31 @@ const useKiosks = () => {
     data,
     ...result
   } = useInfiniteQuery<HydraResponse<Kiosk>, Error>({
-    queryKey: ["kiosks"],
-    queryFn: async ({ pageParam = 1 }: { pageParam: unknown }) => {
-      const response = await kiosApi.getKiosks(pageParam as number);
+    queryKey: ["kiosks", composed],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await kiosApi.getKiosks(pageParam);
+      // Return the augmented response with the updated kiosks
       return {
         searchParams: response.searchParams,
-        data: response.data as Kiosk[],
+        data: response.data, // Use the updatedKiosks with sections added
       };
     },
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage) => {
       if (lastPage.searchParams.next?.page === undefined) {
         return undefined;
       }
-      return parseInt(lastPage.searchParams.next?.page, 10);
+      return parseInt(lastPage.searchParams.next.page, 10);
     },
   });
 
+  // Return the necessary parts of the hook's result
   return {
-    hasNextPage,
     fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
     result: data,
   };
 };

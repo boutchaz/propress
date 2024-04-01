@@ -1,10 +1,11 @@
 import React, { forwardRef, HTMLAttributes } from "react";
 
 import { Action } from "./Action";
-import { Handle } from "./Handle";
-import { Remove } from "./Remove";
+import { GripHorizontal, SquarePen } from "lucide-react";
 import styles from "./TreeItem.module.css";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useDialogStore } from "@/hooks/useDialog";
 
 export interface Props extends HTMLAttributes<HTMLLIElement> {
   childCount?: number;
@@ -45,6 +46,8 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
+    const { open } = useDialogStore();
+
     return (
       <li
         className={cn(
@@ -58,26 +61,30 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
         ref={wrapperRef}
         style={
           {
-            "--spacing": `${indentationWidth * depth}px`
+            "--spacing": `${indentationWidth * depth}px`,
           } as React.CSSProperties
         }
         {...props}
       >
         <div className={styles.TreeItem} ref={ref} style={style}>
-          <Handle {...handleProps} />
+          <GripHorizontal {...handleProps} />
           {onCollapse && (
             <Action
               onClick={onCollapse}
               className={cn(
                 styles.Collapse,
-                collapsed && styles.collapsed
+                collapsed && styles.collapsed,
+                "mx-4"
               )}
             >
               {collapseIcon}
             </Action>
           )}
           <span className={styles.Text}>{value}</span>
-          {!clone && onRemove && <Remove onClick={onRemove} />}
+          <Button variant="ghost" onClick={open}>
+            <SquarePen />
+          </Button>
+          {/* {!clone && onRemove && <Remove onClick={onRemove} />} */}
           {clone && childCount && childCount > 1 ? (
             <span className={styles.Count}>{childCount}</span>
           ) : null}
