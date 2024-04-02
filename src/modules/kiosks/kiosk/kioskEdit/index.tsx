@@ -17,6 +17,7 @@ import { useDialogStore } from "@/hooks/useDialog";
 
 export const KioskEdit = () => {
   const { isOpen, toggle } = useDialogStore();
+  const itemId = useDialogStore((state) => state.itemId);
 
   return (
     <Dialog open={isOpen} onOpenChange={toggle}>
@@ -24,7 +25,7 @@ export const KioskEdit = () => {
         <DialogHeader>
           <DialogTitle>(Section/Item) Name</DialogTitle>
           <DialogDescription>
-            Edit the (section/item) details below
+            Edit the (section/item) {itemId} details below
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center space-x-2">

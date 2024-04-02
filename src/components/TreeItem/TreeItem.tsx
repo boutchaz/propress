@@ -3,6 +3,7 @@ import React, { forwardRef, HTMLAttributes } from "react";
 import { Action } from "./Action";
 import { GripHorizontal, SquarePen } from "lucide-react";
 import styles from "./TreeItem.module.css";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useDialogStore } from "@/hooks/useDialog";
@@ -19,6 +20,7 @@ export interface Props extends HTMLAttributes<HTMLLIElement> {
   indicator?: boolean;
   indentationWidth: number;
   value: string;
+  uuid?: string;
   onCollapse?(): void;
   onRemove?(): void;
   wrapperRef?(node: HTMLLIElement): void;
@@ -42,22 +44,28 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
       style,
       value,
       wrapperRef,
+      uuid,
       ...props
     },
     ref
   ) => {
-    const { open } = useDialogStore();
-
+    const handleOpenDialog = () => {
+      const { open, setItemId } = useDialogStore.getState();
+      setItemId(depth ? `item_${uuid}` : `section_${uuid}`);
+      open();
+      console.log("props");
+    };
     return (
       <li
-        className={cn(
-          styles.Wrapper,
-          clone && styles.clone,
-          ghost && styles.ghost,
-          indicator && styles.indicator,
-          disableSelection && styles.disableSelection,
-          disableInteraction && styles.disableInteraction
-        )}
+        // className={cn(
+        //   styles.Wrapper,
+        //   clone && styles.clone,
+        //   ghost && styles.ghost,
+        //   indicator && styles.indicator,
+        //   disableSelection && styles.disableSelection,
+        //   disableInteraction && styles.disableInteraction
+        // )}
+        className={`list-none box-border mb-[-1px] pl-[var(--spacing)] ${clone ? "inline-block pointer-events-none p-0 ml-2.5 mt-1.25" : ""}`}
         ref={wrapperRef}
         style={
           {
@@ -66,27 +74,33 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
         }
         {...props}
       >
-        <div className={styles.TreeItem} ref={ref} style={style}>
+        <div
+          className="relative flex items-center p-[var(--vertical-padding)] px-2.5 bg-white border border-gray-300 text-gray-800"
+          ref={ref}
+          style={style}
+        >
           <GripHorizontal {...handleProps} />
           {onCollapse && (
             <Action
               onClick={onCollapse}
               className={cn(
-                styles.Collapse,
-                collapsed && styles.collapsed,
-                "mx-4"
+                `transition-transform duration-250 ease-in-out mx-4 ${collapsed ? "transform rotate-[-90deg]" : ""}`
               )}
             >
-              {collapseIcon}
+              <ChevronDown />
             </Action>
           )}
-          <span className={styles.Text}>{value}</span>
-          <Button variant="ghost" onClick={open}>
+          <span className="flex-grow pl-2 whitespace-nowrap overflow-hidden text-ellipsis">
+            {value}
+          </span>
+          <Button variant="ghost" onClick={handleOpenDialog}>
             <SquarePen />
           </Button>
           {/* {!clone && onRemove && <Remove onClick={onRemove} />} */}
           {clone && childCount && childCount > 1 ? (
-            <span className={styles.Count}>{childCount}</span>
+            <span className="absolute top-[-10px] right-[-10px] flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-xs font-semibold text-white">
+              {childCount}
+            </span>
           ) : null}
         </div>
       </li>
