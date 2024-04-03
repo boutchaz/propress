@@ -36,7 +36,7 @@ export const ItemNew = ({ refetch }: { refetch: () => void }) => {
   });
   const queryClient = new QueryClient();
   const mutation = useMutation({
-    mutationFn: async (data: FormValues & { kiosk_id: string }) => {
+    mutationFn: async (data: FormValues & { kiosk: string }) => {
       await kioskApi.createSection(data);
     },
     onSuccess: async () => {
@@ -47,7 +47,7 @@ export const ItemNew = ({ refetch }: { refetch: () => void }) => {
     },
   });
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    mutation.mutate({ ...data, kiosk_id: kiosId });
+    mutation.mutate({ ...data, kiosk: `/api/kiosks/${kiosId}` });
   };
   useEffect(() => {
     const elements = document.querySelectorAll(

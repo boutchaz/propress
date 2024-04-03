@@ -10,6 +10,8 @@ declare module "axios" {
 }
 
 export const DEFAULT_BASE_URL = config.apiBaseUrl;
+axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
+axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Content-Type';
 
 export const refreshAuth = async (refreshToken: string) =>
   axios.post(

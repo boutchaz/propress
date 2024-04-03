@@ -18,12 +18,7 @@ import { Route } from "@/routes/kiosks.$kiosId";
 
 const sectionItemSchema = z.object({
   name: z.string(),
-  ojdTag: z.string().optional(),
   position: z.number().optional(),
-  releaseOffset: z.number().nullable().optional(),
-  goalFixedUpon: z.number().nullable().optional(),
-  issue: z.string().nullable().optional(),
-  publication: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
 });
 
@@ -37,7 +32,7 @@ export const SectionNew = ({ refetch }: { refetch: () => void }) => {
   });
   const queryClient = new QueryClient();
   const mutation = useMutation({
-    mutationFn: async (data: FormValues & { kiosk_id: string }) => {
+    mutationFn: async (data: FormValues & { kiosk: string }) => {
       await kioskApi.createSection(data);
     },
     onSuccess: async () => {
@@ -48,7 +43,7 @@ export const SectionNew = ({ refetch }: { refetch: () => void }) => {
     },
   });
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    mutation.mutate({ ...data, kiosk_id: kiosId });
+    mutation.mutate({ ...data, kiosk: `/api/kiosks/${kiosId}` });
   };
   useEffect(() => {
     const elements = document.querySelectorAll(
