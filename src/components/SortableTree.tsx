@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Announcements,
@@ -31,10 +31,18 @@ import {
   removeItem,
   removeChildrenOf,
   setProperty,
+  createParentMap,
+  ensureItemsCollapsed,
+  isLastItemAtDepth,
 } from "@/lib/tree";
-import type { FlattenedItem, SensorContext, TreeItems } from "@/types/Tree";
-import { sortableTreeKeyboardCoordinates } from "@/lib/keyboardcoordinates";
+import type {
+  FlattenedItem,
+  SensorContext,
+  TreeItem,
+  TreeItems,
+} from "@/types/Tree";
 import { SortableTreeItem } from "@/components/TreeItem/SortableTreeItem";
+import kioskApi from "@/api/kioskApi";
 
 const initialItems: TreeItems = [
   {
@@ -74,7 +82,6 @@ const measuring = {
 
 const dropAnimation: DropAnimation = {
   ...defaultDropAnimation,
-  dragSourceOpacity: 0.5,
 };
 
 interface Props {
@@ -84,13 +91,8 @@ interface Props {
   indicator?: boolean;
   removable?: boolean;
 }
-const ensureItemsCollapsed = (items) => {
-  return items.map((item) => ({
-    ...item,
-    collapsed: item.collapsed ?? true, // Set collapsed to true if not explicitly defined
-    children: item.children ? ensureItemsCollapsed(item.children) : [], // Recursively ensure children are also collapsed
-  }));
-};
+
+
 export function SortableTree({
   collapsible,
   defaultItems = initialItems,
@@ -108,9 +110,9 @@ export function SortableTree({
   } | null>(null);
 
   const flattenedItems = useMemo(() => {
-    const flattenedTree = flattenTree(items);
-    const collapsedItems = flattenedTree.reduce<string[]>(
-      (acc, { children, collapsed, id }) =>
+    const flattenedTree: FlattenedItem[] = flattenTree(items);
+    const collapsedItems: string[] = flattenedTree.reduce<string[]>(
+      (acc: string[], { children, collapsed, id }: FlattenedItem) =>
         collapsed && children.length ? [...acc, id] : acc,
       []
     );
@@ -187,24 +189,50 @@ export function SortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        {flattenedItems.map(({ id, children, collapsed, depth, uuid }) => (
-          <SortableTreeItem
-            key={id}
-            id={id}
-            value={id}
-            uuid={uuid}
-            depth={id === activeId && projected ? projected.depth : depth}
-            indentationWidth={indentationWidth}
-            indicator={indicator}
-            collapsed={Boolean(collapsed && children.length)}
-            onCollapse={
-              collapsible && children.length
-                ? () => handleCollapse(id)
-                : undefined
-            }
-            onRemove={removable ? () => handleRemove(id) : undefined}
-          />
-        ))}
+        <div style={{ padding: "10px", textAlign: "center" }}>
+          <button onClick={() => console.log("Post-pended button")}>
+            add section input name +
+          </button>
+        </div>
+        {flattenedItems.map(
+          ({ id, children, collapsed, depth, uuid, color }, index) => {
+            const displayFirst =
+              items.filter((item) => item.children.length > 0).length === 1;
+            const lastAtDepth = isLastItemAtDepth(
+              flattenedItems,
+              index,
+              depth,
+              id
+            );
+            return (
+              <>
+                <SortableTreeItem
+                  key={id}
+                  id={id}
+                  value={id}
+                  uuid={uuid}
+                  color={color}
+                  depth={id === activeId && projected ? projected.depth : depth}
+                  indentationWidth={indentationWidth}
+                  indicator={indicator}
+                  collapsed={Boolean(collapsed && children.length)}
+                  onCollapse={
+                    collapsible && children.length
+                      ? () => handleCollapse(id)
+                      : undefined
+                  }
+                  onRemove={removable ? () => handleRemove(id) : undefined}
+                />
+                {/* {depth === 1 && lastAtDepth && (
+                  <div style={{ padding: "10px", textAlign: "center" }}>
+                    <button onClick={() => console.log(depth, id)}>add item input name +</button>
+                  </div>
+                )} */}
+              </>
+            );
+          }
+        )}
+
         {createPortal(
           <DragOverlay
             dropAnimation={dropAnimation}
@@ -270,104 +298,82 @@ export function SortableTree({
     }
   }
   // free logic for drag end
-  function handleDragEnd({ active, over }: DragEndEvent) {
+  async function handleDragEnd({ active, over, ...rest }: DragEndEvent) {
     resetState();
+    if (!projected || !over) return;
 
-    if (projected && over) {
-      const { depth, parentId } = projected;
-      const clonedItems: FlattenedItem[] = JSON.parse(
-        JSON.stringify(flattenTree(items))
-      );
-      const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
-      const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
-      const activeTreeItem = clonedItems[activeIndex];
-      const overTreeItem = clonedItems[overIndex];
+    const clonedItems: FlattenedItem[] = JSON.parse(
+      JSON.stringify(flattenTree(items))
+    );
+    const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
+    const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
 
-      clonedItems[activeIndex] = { ...activeTreeItem, depth, parentId };
+    if (activeIndex === -1 || overIndex === -1) return;
 
-      const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
-      const newItems = buildTree(sortedItems);
-      if (
-        (activeTreeItem.depth === projected.depth &&
-          activeTreeItem.parentId === projected.parentId) ||
-        // allow child to be dropped in adjacent parent
-        (activeTreeItem.depth === 1 &&
-          projected.parentId &&
-          projected.depth === 1 &&
-          overTreeItem.depth === 0)
-      ) {
-        setItems(newItems);
-        const newParentChildren = newItems.find(item => item.id === parentId)?.children || [];
-        const newPositionInParent = newParentChildren.findIndex(item => item.id === activeTreeItem.id);
+    const activeTreeItem = clonedItems[activeIndex];
+    const overTreeItem = clonedItems[overIndex];
+    const parentMap = createParentMap(items); // Ideally, this map is kept updated and not recreated on each drag end
+    const overParentId = parentMap.get(over.id);
 
-        console.log(`New position of '${activeTreeItem.id}' within its parent: ${newPositionInParent}`);
+    // Ensure root items remain at the root
+    let newParentId;
+    if (activeTreeItem.depth === 0) {
+      // If the dragged item is at the root, it either stays at the root,
+      // or if attempting to be a child, it should instead move next to the 'over' item at root level.
+      newParentId = null; // Root items stay at root
+    } else {
+      // For non-root items, determine the new parent based on the 'over' item.
+      newParentId = overTreeItem.depth === 0 ? null : overTreeItem.parentId;
+    }
+
+    // Update the dragged item's properties
+    activeTreeItem.parentId = newParentId;
+    // Optionally adjust depth if necessary
+    activeTreeItem.depth =
+      newParentId == null ? 0 : overTreeItem.parentId ? overTreeItem.depth : 1;
+
+    // Perform the array move operation
+    const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
+    // Rebuild the tree structure
+    const newItems = buildTree(sortedItems);
+    const isChildTargetRoot =
+      overTreeItem.depth === 0 && activeTreeItem.children.length === 0;
+    if (!isChildTargetRoot) {
+      setItems(newItems);
+    }
+
+    if (activeTreeItem.depth == 0) {
+      const demo = newItems
+        .map((item: any, index: number) => {
+          return {
+            position: index,
+            id: item.uuid,
+            name: item.id,
+          };
+        })
+        .sort((a: any, b: any) => a.position - b.position);
+    } else {
+      const sectionID = newItems.find(
+        (item: any) => item.id === overTreeItem.parentId
+      )?.["@id"];
+      const demo1 = newItems.find((item: any) => item.id === overParentId);
+      const positoin =
+        demo1?.children.findIndex(
+          (item: any) => item.uuid === activeTreeItem.uuid
+        ) ?? 0;
+      try {
+        console.log(demo1);
+        const res = await kioskApi.updateSectionItemPosition(
+          activeTreeItem!.uuid,
+          sectionID,
+          positoin
+        );
+        console.log(res);
+      } catch (error) {
+        console.log;
       }
     }
   }
-  // limit for adjecents only
-  // function handleDragEnd({ active, over }: DragEndEvent) {
-  //   resetState();
-
-  //   if (!over || !projected) {
-  //     // If there's no target position or projection data, exit early
-  //     return;
-  //   }
-
-  //   const clonedItems: FlattenedItem[] = JSON.parse(
-  //     JSON.stringify(flattenTree(items))
-  //   );
-  //   const overIndex = clonedItems.findIndex(({ id }) => id === over.id);
-  //   const activeIndex = clonedItems.findIndex(({ id }) => id === active.id);
-
-  //   if (overIndex === -1 || activeIndex === -1) {
-  //     // If either the active or over items aren't found, exit early
-  //     return;
-  //   }
-
-  //   const activeTreeItem = clonedItems[activeIndex];
-  //   const overTreeItem = clonedItems[overIndex];
-
-  //   // Ensure active and over items are at the same depth and have the same parentId
-  //   console.log(activeTreeItem,projected)
-  //   console.log((activeTreeItem.depth === overTreeItem.depth &&
-  //     activeTreeItem.parentId === overTreeItem.parentId) ||
-  //   // allow child to be dropped in adjacent parent
-  //   (activeTreeItem.depth === 1 &&
-  //     !!projected.parentId))
-  //   if (
-  //     (activeTreeItem.depth === overTreeItem.depth &&
-  //       activeTreeItem.parentId === overTreeItem.parentId) ||
-  //     // allow child to be dropped in adjacent parent
-  //     (activeTreeItem.depth === 1 &&
-  //       projected.parentId)
-  //   ) {
-  //     // Update the active item's position to the over item's position
-  //     const sortedItems = arrayMove(clonedItems, activeIndex, overIndex);
-  //     // Rebuild the tree structure with the newly sorted items
-  //     const newItems = buildTree(sortedItems);
-  //     setItems(newItems);
-  //     if (activeTreeItem.depth == 0) {
-  //       const demo = newItems
-  //         .map((item: any, index: number) => {
-  //           return {
-  //             position: index,
-  //             id: item.uuid,
-  //             name: item.id,
-  //           };
-  //         })
-  //         .sort((a: any, b: any) => a.position - b.position);
-  //       console.log(demo);
-  //     }
-  //     console.log(newItems);
-  //     // Update the state with the new items array
-  //     setItems(newItems);
-  //   } else {
-  //     // Log or handle the case where the drag-and-drop operation is not allowed
-  //     console.log(
-  //       "Drag and drop operation is not allowed. Items must be on the same level and under the same parent."
-  //     );
-  //   }
-  // }
 
   function handleDragCancel() {
     resetState();

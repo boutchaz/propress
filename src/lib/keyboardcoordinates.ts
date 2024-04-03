@@ -9,6 +9,7 @@ import {
 
 import type { SensorContext } from "@/types/Tree";
 import { getProjection } from "@/lib/tree";
+import { RectMap } from "@dnd-kit/core/dist/store";
 
 const directions: string[] = [
   KeyboardCode.Down,
@@ -45,8 +46,8 @@ export const sortableTreeKeyboardCoordinates: (
       if (horizontal.includes(event.code) && over?.id) {
         const { depth, maxDepth, minDepth } = getProjection(
           items,
-          active.id,
-          over.id,
+          active.id.toString(),
+          over.id.toString(),
           offset,
           indentationWidth
         );
@@ -105,12 +106,18 @@ export const sortableTreeKeyboardCoordinates: (
           }
         });
       }
-
+      const droppableRects: RectMap = new Map(
+        Array.from(droppableContainers).map(([id, container]) => [
+          id,
+          container.rect.current,
+        ])
+      );
       const collisions = closestCorners({
         active,
         collisionRect: collisionRect,
         pointerCoordinates: null,
         droppableContainers: containers,
+        droppableRects: droppableRects,
       });
       const closestId = getFirstCollision(collisions, "id");
 
@@ -126,8 +133,8 @@ export const sortableTreeKeyboardCoordinates: (
           if (newItem && activeItem) {
             const { depth } = getProjection(
               items,
-              active.id,
-              closestId,
+              active.id.toString(),
+              closestId.toString(),
               (newItem.depth - activeItem.depth) * indentationWidth,
               indentationWidth
             );

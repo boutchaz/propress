@@ -111,7 +111,8 @@ const Kiosks = () => {
                       variant="ghost"
                       onClick={() => {
                         router.navigate({
-                          to: `/kiosks/${row.original?.id}`,
+                          to: `/kiosks/`,
+                          params: { id: row.original.id },
                         });
                       }}
                     >

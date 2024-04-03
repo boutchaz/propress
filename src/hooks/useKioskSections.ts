@@ -14,6 +14,9 @@ const useKioskSections = (kioskId: string) => {
             return {
               id: section.name,
               uuid: section.id,
+              "@id": section["@id"],
+              color: section.color,
+              position: section.position,
               children: items["hydra:member"]
                 ? (items["hydra:member"] as any)
                     .map((item: any) => {
@@ -21,6 +24,7 @@ const useKioskSections = (kioskId: string) => {
                         id: item.publication.name,
                         uuid: item.id,
                         position: item.position,
+                        "@id": item["@id"],
                         children: [],
                       };
                     })

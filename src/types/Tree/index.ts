@@ -4,6 +4,9 @@ export interface TreeItem {
   id: string;
   children: TreeItem[];
   collapsed?: boolean;
+  uuid?: string;
+  value?: string;
+  color?: string;
 }
 
 export type TreeItems = TreeItem[];
