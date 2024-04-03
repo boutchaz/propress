@@ -14,6 +14,7 @@ import { useEffect, useRef } from "react";
 import kioskApi from "@/api/kioskApi";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { useDrawerStore } from "@/hooks/useDrawer";
+import { Route } from "@/routes/kiosks.$kiosId";
 
 const sectionItemSchema = z.object({
   name: z.string(),
@@ -28,33 +29,16 @@ const sectionItemSchema = z.object({
 
 type FormValues = z.infer<typeof sectionItemSchema>;
 
-export const SectionEdit = ({
-  section,
-  refetch,
-}: {
-  section: Section;
-  refetch: () => void;
-}) => {
+export const SectionNew = ({ refetch }: { refetch: () => void }) => {
   const { close, setItemId } = useDrawerStore();
+  const { kiosId } = Route.useParams();
   const methods = useForm<FormValues>({
     resolver: zodResolver(sectionItemSchema),
-    defaultValues: {
-      name: section.name,
-      position: section.position,
-      color: section.color,
-    },
   });
-  useEffect(() => {
-    methods.reset({
-      name: section.name,
-      position: section.position,
-      color: section.color,
-    });
-  }, [section]);
   const queryClient = new QueryClient();
   const mutation = useMutation({
-    mutationFn: async (data: FormValues & { id: number }) => {
-      await kioskApi.updateSection(section.id, data);
+    mutationFn: async (data: FormValues & { kiosk_id: string }) => {
+      await kioskApi.createSection(data);
     },
     onSuccess: async () => {
       close();
@@ -64,7 +48,7 @@ export const SectionEdit = ({
     },
   });
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    mutation.mutate({ ...data, id: section.id });
+    mutation.mutate({ ...data, kiosk_id: kiosId });
   };
   useEffect(() => {
     const elements = document.querySelectorAll(

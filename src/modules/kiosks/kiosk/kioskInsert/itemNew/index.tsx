@@ -6,16 +6,16 @@ import {
   Controller,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Section } from "@/types/Section"; // Assuming this is correctly imported
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Sketch from "@uiw/react-color-sketch";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import kioskApi from "@/api/kioskApi";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { useDrawerStore } from "@/hooks/useDrawer";
+import { Route } from "@/routes/kiosks.$kiosId";
 
-const sectionItemSchema = z.object({
+const itemSchema = z.object({
   name: z.string(),
   ojdTag: z.string().optional(),
   position: z.number().optional(),
@@ -26,35 +26,18 @@ const sectionItemSchema = z.object({
   color: z.string().nullable().optional(),
 });
 
-type FormValues = z.infer<typeof sectionItemSchema>;
+type FormValues = z.infer<typeof itemSchema>;
 
-export const SectionEdit = ({
-  section,
-  refetch,
-}: {
-  section: Section;
-  refetch: () => void;
-}) => {
+export const ItemNew = ({ refetch }: { refetch: () => void }) => {
   const { close, setItemId } = useDrawerStore();
+  const { kiosId } = Route.useParams();
   const methods = useForm<FormValues>({
-    resolver: zodResolver(sectionItemSchema),
-    defaultValues: {
-      name: section.name,
-      position: section.position,
-      color: section.color,
-    },
+    resolver: zodResolver(itemSchema),
   });
-  useEffect(() => {
-    methods.reset({
-      name: section.name,
-      position: section.position,
-      color: section.color,
-    });
-  }, [section]);
   const queryClient = new QueryClient();
   const mutation = useMutation({
-    mutationFn: async (data: FormValues & { id: number }) => {
-      await kioskApi.updateSection(section.id, data);
+    mutationFn: async (data: FormValues & { kiosk_id: string }) => {
+      await kioskApi.createSection(data);
     },
     onSuccess: async () => {
       close();
@@ -64,7 +47,7 @@ export const SectionEdit = ({
     },
   });
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    mutation.mutate({ ...data, id: section.id });
+    mutation.mutate({ ...data, kiosk_id: kiosId });
   };
   useEffect(() => {
     const elements = document.querySelectorAll(

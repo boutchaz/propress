@@ -10,6 +10,8 @@ import { useItemOrSectionData } from "@/hooks/useItemOrSectionData";
 import { useMemo } from "react";
 import { ItemEdit } from "./ItemEdit";
 import { SectionEdit } from "./SectionEdit";
+import { SectionNew } from "../kioskInsert/sectionNew";
+import { ItemNew } from "../kioskInsert/itemNew";
 
 export const KioskEdit = () => {
   // Accessing store state in a unified manner for consistency
@@ -23,11 +25,13 @@ export const KioskEdit = () => {
     () => itemId?.split("_")[0] === "section",
     [itemId]
   );
-  const { data, isLoading } = useItemOrSectionData(itemId);
-  console.log(data);
-  if (isLoading) return <p>Loading...</p>;
+  const isNew = useMemo(() => itemId?.split("_")[1] === "new", [itemId]);
+
+  const { data, isLoading, invalidateSection } = useItemOrSectionData(
+    isNew ? null : itemId
+  );
   return (
-    <Drawer open={isOpen} onClose={handleClose} direction="right" >
+    <Drawer open={isOpen} onClose={handleClose} direction="right">
       <DrawerContent
         className="h-screen top-0 right-0 left-auto mt-0  rounded-none overflow-auto w-1/2"
         onInteractOutside={handleClose}
@@ -36,24 +40,42 @@ export const KioskEdit = () => {
         <div className="mx-auto p-5 w-full" data-vaul-no-drag>
           <DrawerHeader data-vaul-no-drag>
             <DrawerTitle>
-              Updating {isSection ? `Section ${id} '${data?.name}'` : `Item ${id} '${data?.publication.name}'`}
+              {isNew ? (
+                "Create New "
+              ) : (
+                <>
+                  (
+                  {isSection
+                    ? `Section ${id} '${data?.name}'`
+                    : `Item ${id} '${data?.publication.name}'`}
+                  )
+                </>
+              )}
             </DrawerTitle>
             <DrawerDescription data-vaul-no-drag>
-              * This is a description of the item or section
+              {isSection &&
+                (isNew
+                  ? "Create a new section for this kiosk"
+                  : "Edit this section's details")}
             </DrawerDescription>
           </DrawerHeader>
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <>
-              {data &&
-                (isSection ? (
-                  <SectionEdit section={data} data-vaul-no-drag />
-                ) : (
-                  <ItemEdit item={data} />
-                ))}
-            </>
-          )}
+          {data &&
+            (isSection ? (
+              <SectionEdit
+                section={data}
+                refetch={invalidateSection}
+                data-vaul-no-drag
+              />
+            ) : (
+              <ItemEdit item={data} />
+            ))}
+          {isNew ? "true" : "false"}
+          {isNew &&
+            (isSection ? (
+              <SectionNew refetch={invalidateSection} />
+            ) : (
+              <ItemNew />
+            ))}
         </div>
       </DrawerContent>
     </Drawer>

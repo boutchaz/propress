@@ -57,4 +57,8 @@ export default {
     });
     return response.data;
   },
+  createSection: async (data: Pick<Section, "icon" | "color" | "position">) => {
+    const response = await API.post(`/kiosk_sections`, data);
+    return response.data;
+  },
 };

@@ -43,6 +43,8 @@ import type {
 } from "@/types/Tree";
 import { SortableTreeItem } from "@/components/TreeItem/SortableTreeItem";
 import kioskApi from "@/api/kioskApi";
+import { useDrawerStore } from "@/hooks/useDrawer";
+import { Button } from "./ui/button";
 
 const initialItems: TreeItems = [
   {
@@ -92,7 +94,6 @@ interface Props {
   removable?: boolean;
 }
 
-
 export function SortableTree({
   collapsible,
   defaultItems = initialItems,
@@ -100,10 +101,15 @@ export function SortableTree({
   indentationWidth = 20,
   removable,
 }: Props) {
+  console.log(defaultItems);
   const [items, setItems] = useState(() => ensureItemsCollapsed(defaultItems));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
+  useEffect(() => {
+    console.log(defaultItems);
+    setItems(ensureItemsCollapsed(defaultItems));
+  }, [defaultItems]);
   const [currentPosition, setCurrentPosition] = useState<{
     parentId: string | null;
     overId: string;
@@ -175,7 +181,12 @@ export function SortableTree({
       return `Moving was cancelled. ${id} was dropped in its original position.`;
     },
   };
+  const { toggle, setItemId } = useDrawerStore();
 
+  const handleInsert = () => {
+    setItemId("section_new");
+    toggle(); // This assumes toggle is the correct method to use
+  };
   return (
     <DndContext
       announcements={announcements}
@@ -189,10 +200,13 @@ export function SortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        <div style={{ padding: "10px", textAlign: "center" }}>
-          <button onClick={() => console.log("Post-pended button")}>
+        <div
+          className="flex items-center justify-center p-[var(--vertical-padding)] px-2.5 bg-white border border-gray-300 text-gray-80"
+          style={{ padding: "10px", textAlign: "center" }}
+        >
+          <Button variant="outline" onClick={() => handleInsert()}>
             add section input name +
-          </button>
+          </Button>
         </div>
         {flattenedItems.map(
           ({ id, children, collapsed, depth, uuid, color }, index) => {

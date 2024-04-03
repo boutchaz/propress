@@ -53,8 +53,12 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
   ) => {
     const { toggle, setItemId } = useDrawerStore();
 
-    const handleOpenDialog = () => {
+    const handleUpdate = () => {
       setItemId(depth ? `item_${uuid}` : `section_${uuid}`);
+      toggle(); // This assumes toggle is the correct method to use
+    };
+    const handleInsert = () => {
+      setItemId("item_new");
       toggle(); // This assumes toggle is the correct method to use
     };
     return (
@@ -92,10 +96,12 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
           >
             {value}
           </span>
-          <Button variant="ghost" onClick={handleOpenDialog}>
-            <CirclePlus />
-          </Button>
-          <Button variant="ghost" onClick={handleOpenDialog}>
+          {depth === 0 && (
+            <Button variant="ghost" onClick={handleInsert}>
+              <CirclePlus />
+            </Button>
+          )}
+          <Button variant="ghost" onClick={handleUpdate}>
             <SquarePen />
           </Button>
           {/* {!clone && onRemove && <Remove onClick={onRemove} />} */}

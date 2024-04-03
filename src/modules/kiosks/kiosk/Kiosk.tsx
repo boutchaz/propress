@@ -4,10 +4,18 @@ import { SortableTree } from "@/components/SortableTree";
 import { Route } from "@/routes/kiosks.$kiosId";
 import { Link } from "@tanstack/react-router";
 import { KioskEdit } from "./kioskEdit";
+import { useState, useEffect } from "react";
 
 const Kiosk = () => {
   const { kiosId } = Route.useParams();
-  const { result, error, isLoading } = useKioskSections(kiosId);
+  const { result, error, isLoading, refetch } = useKioskSections(kiosId);
+  const [items, setItems] = useState<any>(null);
+  useEffect(() => {
+    if (result) {
+      setItems((result as any).data);
+    }
+  }, [result]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
   return (
@@ -17,12 +25,12 @@ const Kiosk = () => {
           Hello /kiosks/$kiosId! kiosk name kiosk logo
           <Link to="/">Go back</Link>
           <KioskEdit />
-          {result && (
+          {items && (
             <SortableTree
               collapsible
               indicator
               removable
-              defaultItems={(result as any).data}
+              defaultItems={items}
             />
           )}
         </div>

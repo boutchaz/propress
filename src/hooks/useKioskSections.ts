@@ -3,7 +3,7 @@ import kiosApi from "@/api/kioskApi";
 import { HydraResponse } from "@/types/Hydra";
 
 const useKioskSections = (kioskId: string) => {
-  const { data, error, isLoading } = useQuery<HydraResponse<any>, Error>({
+  const { data, error, isLoading , refetch } = useQuery<HydraResponse<any>, Error>({
     queryKey: ["kiosk-sections", kioskId],
     queryFn: async () => {
       const response = await kiosApi.getKiosksSections(kioskId);
@@ -57,10 +57,12 @@ const useKioskSections = (kioskId: string) => {
     },
     enabled: !!kioskId,
   });
+  console.log("data", data);
   return {
     result: data,
     error,
     isLoading,
+    refetch
   };
 };
 
