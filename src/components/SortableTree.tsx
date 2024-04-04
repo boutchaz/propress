@@ -346,15 +346,17 @@ export function SortableTree({
     }
 
     if (activeTreeItem.depth == 0) {
-      const demo = newItems
-        .map((item: any, index: number) => {
-          return {
-            position: index,
-            id: item.uuid,
-            name: item.id,
-          };
-        })
-        .sort((a: any, b: any) => a.position - b.position);
+      const position = newItems.findIndex(
+        (item: any) => item.id === activeTreeItem.id
+      );
+      try {
+        const payload = {
+          position: position,
+        };
+        const res = await kioskApi.updateSection(activeTreeItem.id, payload);
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       const sectionID = newItems.find(
         (item: any) => item.id === overTreeItem.parentId
@@ -371,7 +373,7 @@ export function SortableTree({
           positoin
         );
       } catch (error) {
-        console.log;
+        console.log(error);
       }
     }
   }

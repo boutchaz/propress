@@ -104,7 +104,7 @@ export const SectionNew = ({ refetch }: { refetch: () => void }) => {
           data-vaul-no-drag
           className="flex justify-center items-center w-full mt-8"
         >
-          <Button data-vaul-no-drag type="submit">
+          <Button data-vaul-no-drag type="submit" className="bg-gray-500">
             Enregistrer
           </Button>
         </div>

@@ -28,9 +28,7 @@ const fetchOptions = async (inputValue: string): Promise<OptionType[]> => {
 type PublicationsPickerProps = {
   field: any;
 };
-export const PublicationsPicker = ({
-  field,
-}: PublicationsPickerProps) => {
+export const PublicationsPicker = ({ field }: PublicationsPickerProps) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [search, setSearch] = useState("");
   const [options, setOptions] = useState([]);
@@ -67,40 +65,38 @@ export const PublicationsPicker = ({
   const handleSearchChange = debounce(setSearch, 500);
 
   return (
-    <div>
-      <AsyncSelect
-        cacheOptions
-        loadOptions={fetchOptions}
-        defaultOptions
-        value={selectedOption}
-        onChange={handleChange}
-        placeholder="Select publichser..."
-        isClearable={true}
-        classNamePrefix="react-select"
-        {...field}
-        styles={{
-          control: (provided) => ({
-            ...provided,
-            backgroundColor: "var(--color-background)",
-            borderColor: "var(--color-border)",
-            "&:hover": {
-              borderColor: "var(--color-border-hover)",
-            },
-          }),
-          option: (provided, state) => ({
-            ...provided,
-            backgroundColor: state.isFocused
-              ? "var(--color-option-focused)"
-              : "white", // Adjust for a non-white background on focus
-            color: "black", // Text color - change as needed
-            "&:hover": {
-              backgroundColor: "var(--color-hover)", // Ensure contrast with text color
-            },
-          }),
+    <AsyncSelect
+      cacheOptions
+      loadOptions={fetchOptions}
+      defaultOptions
+      value={selectedOption}
+      onChange={handleChange}
+      placeholder="Select publichser..."
+      isClearable={true}
+      classNamePrefix="react-select"
+      {...field}
+      styles={{
+        control: (provided) => ({
+          ...provided,
+          backgroundColor: "var(--color-background)",
+          // borderColor: "var(--color-border)",
+          "&:hover": {
+            borderColor: "var(--color-border-hover)",
+          },
+        }),
+        option: (provided, state) => ({
+          ...provided,
+          backgroundColor: state.isFocused
+            ? "var(--color-option-focused)"
+            : "white", // Adjust for a non-white background on focus
+          color: "black", // Text color - change as needed
+          "&:hover": {
+            backgroundColor: "var(--color-hover)", // Ensure contrast with text color
+          },
+        }),
 
-          // Add other custom styles as needed
-        }}
-      />
-    </div>
+        // Add other custom styles as needed
+      }}
+    />
   );
 };

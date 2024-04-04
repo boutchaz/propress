@@ -58,7 +58,7 @@ export default {
     const response = await API.get(`/kiosk_sections/${sectionID}`);
     return response.data;
   },
-  updateSection: async (sectionID: number, data: Section) => {
+  updateSection: async (sectionID: number | string, data: Partial<Pick<Section, "icon" | "color" | "position">>) => {
     const response = await API.patch(`/kiosk_sections/${sectionID}`, data, {
       headers: {
         "Content-Type": "application/merge-patch+json",
@@ -66,7 +66,7 @@ export default {
     });
     return response.data;
   },
-  createSection: async (data: Pick<Section, "icon" | "color" | "position">) => {
+  createSection: async (data: Partial<Pick<Section, "icon" | "color" | "position">>) => {
     const response = await API.post(`/kiosk_sections`, data);
     return response.data;
   },
