@@ -10,11 +10,11 @@ export default {
       "https://staging01-app.lekiosquenumerique.fr/api/login",
       {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST",
-        },
+        // headers: {
+        //   "Content-Type": "application/json",
+        //   "Access-Control-Allow-Origin": "*",
+        //   "Access-Control-Allow-Methods": "POST",
+        // },
         body: JSON.stringify({ username, password })
       }
     );

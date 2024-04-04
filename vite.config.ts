@@ -2,13 +2,20 @@ import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
-import { VitePWA } from 'vite-plugin-pwa';
+import { VitePWA } from "vite-plugin-pwa";
 
-let faviconURL = '/favicon.svg'
-
+let faviconURL = "/favicon.svg";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://staging01-app.lekiosquenumerique.fr/",
+        changeOrigin: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -19,10 +26,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          lodash: ['lodash']
-        }
-      }
-    }
+          lodash: ["lodash"],
+        },
+      },
+    },
   },
   plugins: [
     react(),
