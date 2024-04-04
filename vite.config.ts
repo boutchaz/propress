@@ -11,10 +11,24 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://staging01-app.lekiosquenumerique.fr/",
+        target: "env.VITE_API_REAL_URL",
         changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/api/, ""),
       },
     },
+    cors: false,
+  },
+  preview: {
+    proxy: {
+      "/api": {
+        target: "env.VITE_API_REAL_URL",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/api/, ""),
+      },
+    },
+    cors: false,
   },
   resolve: {
     alias: {
@@ -33,25 +47,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    VitePWA({
-      includeAssets: [faviconURL],
-      manifest: {
-        theme_color: "#ffffff",
-        icons: [
-          {
-            src: faviconURL,
-            sizes: "512x512",
-            type: "image/svg+xml",
-            purpose: "any maskable",
-          },
-          {
-            src: faviconURL,
-            sizes: "512x512",
-            type: "image/png",
-          },
-        ],
-      },
-    }),
     TanStackRouterVite(),
   ],
 });
