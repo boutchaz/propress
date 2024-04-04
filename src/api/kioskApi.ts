@@ -9,12 +9,12 @@ export default {
     const response = await API.post(
       "/login",
       { username, password }
-      // {
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "Access-Control-Allow-Origin": "*",
-      //   },
-      // }
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
     );
     return response.data;
   },
