@@ -7,7 +7,7 @@ import { Section } from "@/types/Section";
 export default {
   login: async (username: string, password: string) => {
     const response = await fetch(
-      "/login",
+      "https://staging01-app.lekiosquenumerique.fr/api/login",
       {
         method: 'POST',
         headers: {
