@@ -88,7 +88,10 @@ const Kiosks = () => {
                         )}
                   </TableHead>
                 ))}
-                <TableHead className="flex justify-center items-center" key="actions">
+                <TableHead
+                  className="flex justify-center items-center"
+                  key="actions"
+                >
                   Actions
                 </TableHead>
               </TableRow>
@@ -155,9 +158,9 @@ const Kiosks = () => {
         <div className="h-4" />
         <div className="container flex justify-center items-center">
           {hasNextPage && (
-            <button onClick={loadMore} className="border p-2">
+            <Button onClick={loadMore} className="border p-2">
               load more
-            </button>
+            </Button>
           )}
         </div>
       </div>

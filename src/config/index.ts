@@ -3,7 +3,7 @@ export interface IAppConfig {
 }
 
 const config: IAppConfig = {
-  apiBaseUrl: import.meta.env.API_BASE_URL || "https://d28r9ja8pir71l.cloudfront.net/api",
+  apiBaseUrl: import.meta.env.API_BASE_URL || "https://staging01-app.lekiosquenumerique.fr/api",
 };
 
 export default config;
