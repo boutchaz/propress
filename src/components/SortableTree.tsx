@@ -201,7 +201,7 @@ export function SortableTree({
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
         <div
-          className="flex items-center justify-center p-[var(--vertical-padding)] px-2.5  text-gray-80"
+          className="flex items-center justify-center p-[var(--vertical-padding)] px-2.5  text-gray-80 border-dashed border-2 border-gray-200 rounded-md cursor-pointer hover:border-gray-300"
           style={{ padding: "10px", textAlign: "center" }}
         >
           <Button variant="outline" onClick={() => handleInsert()}>

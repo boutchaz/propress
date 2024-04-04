@@ -18,6 +18,10 @@ export default {
     );
     return response.data;
   },
+  getKiosk: async (kioskId: string) => {
+    const response = await API.get(`${config.apiBaseUrl}/kiosks/${kioskId}`);
+    return response.data;
+  },
   getKiosks: async (pageParam: number) => {
     const response = await API.get<Kiosk[]>(
       `${config.apiBaseUrl}/kiosks?page=${pageParam}`

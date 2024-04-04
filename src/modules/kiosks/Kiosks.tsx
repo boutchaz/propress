@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Layout } from "@/components/layout";
 import useKiosks from "@/hooks/useKiosks";
 import { Kiosk } from "@/types/Kiosk";
@@ -99,8 +100,8 @@ const Kiosks = () => {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <>
-                <TableRow key={row.id}>
+              <Fragment key={row.id}>
+                <TableRow>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -135,7 +136,7 @@ const Kiosks = () => {
                     </TableCell>
                   </TableRow>
                 )}
-              </>
+              </Fragment>
             ))}
           </TableBody>
           {/* <TableFooter>
