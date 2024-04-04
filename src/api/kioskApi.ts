@@ -8,7 +8,7 @@ export default {
   login: async (username: string, password: string) => {
     const response = await API.post(
       "/login",
-      { username, password }
+      { username, password },
       {
         headers: {
           "Content-Type": "application/json",
