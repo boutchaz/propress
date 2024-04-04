@@ -6,10 +6,7 @@ import { useEffect, useState } from "react";
 
 const KioskSections = ({ kioskId }: { kioskId: string }) => {
   const { result } = useKioskSections(kioskId);
-  console.log(result);
-  // const { error, isLoading, data } = useKioskSections();
   const [data, _setData] = useState(() => []);
-  console.log(result);
   useEffect(() => {
     if (result) {
       _setData((result as any).data);

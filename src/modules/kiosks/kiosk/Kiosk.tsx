@@ -22,9 +22,8 @@ const Kiosk = () => {
     <Layout>
       <div className="container">
         <div>
-          Hello /kiosks/$kiosId! kiosk name kiosk logo
           <Link to="/">Go back</Link>
-          <KioskEdit />
+          <KioskEdit refetch={refetch} />
           {items && (
             <SortableTree
               collapsible

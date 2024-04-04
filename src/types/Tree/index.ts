@@ -7,6 +7,7 @@ export interface TreeItem {
   uuid?: string;
   value?: string;
   color?: string;
+  name?: string;
 }
 
 export type TreeItems = TreeItem[];

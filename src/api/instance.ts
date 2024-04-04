@@ -10,8 +10,9 @@ declare module "axios" {
 }
 
 export const DEFAULT_BASE_URL = config.apiBaseUrl;
-axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
-axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Content-Type';
+// axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
+// axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Content-Type';
+// axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://staging-demo.lekiosquenumerique.fr';
 
 export const refreshAuth = async (refreshToken: string) =>
   axios.post(
@@ -21,6 +22,10 @@ export const refreshAuth = async (refreshToken: string) =>
     },
     {
       skipAuthRefresh: true,
+      // headers: {
+      //   "Content-Type": "application/json",
+      //   "Access-Control-Allow-Origin": "*",
+      // },
     } as any
   );
 

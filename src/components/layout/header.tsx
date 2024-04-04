@@ -21,7 +21,7 @@ export default function Header() {
             className="h-8 me-3"
             alt="Groupe ProPres Logo"
           />
-          <h1 className="text-lg font-semibold">Le Kiosque Numérique</h1>
+          <h1 className="text-lg font-semibold text-black dark:text-white">Le Kiosque Numérique</h1>
         </Link>
         {/* <Boxes className="h-6 w-6" /> */}
         <div className={cn("block md:!hidden")}>{/* <MobileSidebar /> */}</div>

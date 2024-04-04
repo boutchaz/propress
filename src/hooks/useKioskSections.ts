@@ -12,18 +12,20 @@ const useKioskSections = (kioskId: string) => {
           .map(async (section: any) => {
             const items = await kiosApi.getKioskItems(section.id);
             return {
-              id: section.name,
+              id: section.id,
               uuid: section.id,
               "@id": section["@id"],
+              name: section.name,
               color: section.color,
               position: section.position,
               children: items["hydra:member"]
                 ? (items["hydra:member"] as any)
                     .map((item: any) => {
                       return {
-                        id: item.publication.name,
+                        id: item.id,
                         uuid: item.id,
                         position: item.position,
+                        name: item.publication.name,
                         "@id": item["@id"],
                         children: [],
                       };
@@ -57,7 +59,6 @@ const useKioskSections = (kioskId: string) => {
     },
     enabled: !!kioskId,
   });
-  console.log("data", data);
   return {
     result: data,
     error,

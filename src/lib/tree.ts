@@ -288,3 +288,25 @@ export function isLastItemAtDepth(
   }
   return false; // Ajouté pour gérer tous les cas de sortie
 }
+
+export function findSectionId(sections: any, id: string) {
+  for (const section of sections) {
+    // Check if the current section is the one we're looking for
+    if (section.id === id) {
+      // Found the section as a parent, return its own ID
+      return section.id;
+    }
+
+    // Check if the current section has children and search within them
+    if (section.children.length > 0) {
+      for (const child of section.children) {
+        if (child.id === id) {
+          // Found the ID in children, return the parent section ID
+          return section.id;
+        }
+      }
+    }
+  }
+  // Return null if no matching section or child is found
+  return null;
+}

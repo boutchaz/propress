@@ -8,12 +8,12 @@ import {
 import { useDrawerStore } from "@/hooks/useDrawer";
 import { useItemOrSectionData } from "@/hooks/useItemOrSectionData";
 import { useMemo } from "react";
-import { ItemEdit } from "./ItemEdit";
 import { SectionEdit } from "./SectionEdit";
 import { SectionNew } from "../kioskInsert/sectionNew";
 import { ItemNew } from "../kioskInsert/itemNew";
+import { ItemEdit } from "./ItemEdit";
 
-export const KioskEdit = () => {
+export const KioskEdit = ({ refetch }: { refetch: any }) => {
   // Accessing store state in a unified manner for consistency
   const { isOpen, close, setItemId, itemId } = useDrawerStore();
   const handleClose = () => {
@@ -63,18 +63,21 @@ export const KioskEdit = () => {
             (isSection ? (
               <SectionEdit
                 section={data}
-                refetch={invalidateSection}
+                refetch={refetch}
                 data-vaul-no-drag
               />
             ) : (
-              <ItemEdit item={data} />
+              <ItemEdit
+                item={data}
+                refetch={refetch}
+                data-vaul-no-drag
+              />
             ))}
-          {isNew ? "true" : "false"}
           {isNew &&
             (isSection ? (
-              <SectionNew refetch={invalidateSection} />
+              <SectionNew refetch={refetch} />
             ) : (
-              <ItemNew />
+              <ItemNew refetch={refetch} />
             ))}
         </div>
       </DrawerContent>

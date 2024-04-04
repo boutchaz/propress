@@ -34,6 +34,7 @@ import {
   createParentMap,
   ensureItemsCollapsed,
   isLastItemAtDepth,
+  findSectionId,
 } from "@/lib/tree";
 import type {
   FlattenedItem,
@@ -46,35 +47,36 @@ import kioskApi from "@/api/kioskApi";
 import { useDrawerStore } from "@/hooks/useDrawer";
 import { Button } from "./ui/button";
 
-const initialItems: TreeItems = [
-  {
-    id: "Course",
-    children: [
-      {
-        id: "Module",
-        children: [],
-      },
-    ],
-  },
-  {
-    id: "Course 1",
-    children: [
-      {
-        id: "Module 1",
-        children: [],
-      },
-    ],
-  },
-  {
-    id: "Course 2",
-    children: [
-      {
-        id: "Module 2",
-        children: [],
-      },
-    ],
-  },
-];
+// example
+// const initialItems: TreeItems = [
+//   {
+//     id: "Course",
+//     children: [
+//       {
+//         id: "Module",
+//         children: [],
+//       },
+//     ],
+//   },
+//   {
+//     id: "Course 1",
+//     children: [
+//       {
+//         id: "Module 1",
+//         children: [],
+//       },
+//     ],
+//   },
+//   {
+//     id: "Course 2",
+//     children: [
+//       {
+//         id: "Module 2",
+//         children: [],
+//       },
+//     ],
+//   },
+// ];
 
 const measuring = {
   droppable: {
@@ -96,18 +98,16 @@ interface Props {
 
 export function SortableTree({
   collapsible,
-  defaultItems = initialItems,
+  defaultItems = [],
   indicator,
   indentationWidth = 20,
   removable,
 }: Props) {
-  console.log(defaultItems);
-  const [items, setItems] = useState(() => ensureItemsCollapsed(defaultItems));
+  const [items, setItems] = useState<TreeItems>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
   useEffect(() => {
-    console.log(defaultItems);
     setItems(ensureItemsCollapsed(defaultItems));
   }, [defaultItems]);
   const [currentPosition, setCurrentPosition] = useState<{
@@ -201,7 +201,7 @@ export function SortableTree({
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
         <div
-          className="flex items-center justify-center p-[var(--vertical-padding)] px-2.5 bg-white border border-gray-300 text-gray-80"
+          className="flex items-center justify-center p-[var(--vertical-padding)] px-2.5  text-gray-80"
           style={{ padding: "10px", textAlign: "center" }}
         >
           <Button variant="outline" onClick={() => handleInsert()}>
@@ -209,40 +209,29 @@ export function SortableTree({
           </Button>
         </div>
         {flattenedItems.map(
-          ({ id, children, collapsed, depth, uuid, color }, index) => {
-            const displayFirst =
-              items.filter((item) => item.children.length > 0).length === 1;
-            const lastAtDepth = isLastItemAtDepth(
-              flattenedItems,
-              index,
-              depth,
-              id
-            );
+          ({ id, children, collapsed, depth, uuid, color, name }, index) => {
+            const sectionID = findSectionId(flattenedItems, id);
+
             return (
-              <>
-                <SortableTreeItem
-                  key={id}
-                  id={id}
-                  value={id}
-                  uuid={uuid}
-                  color={color}
-                  depth={id === activeId && projected ? projected.depth : depth}
-                  indentationWidth={indentationWidth}
-                  indicator={indicator}
-                  collapsed={Boolean(collapsed && children.length)}
-                  onCollapse={
-                    collapsible && children.length
-                      ? () => handleCollapse(id)
-                      : undefined
-                  }
-                  onRemove={removable ? () => handleRemove(id) : undefined}
-                />
-                {/* {depth === 1 && lastAtDepth && (
-                  <div style={{ padding: "10px", textAlign: "center" }}>
-                    <button onClick={() => console.log(depth, id)}>add item input name +</button>
-                  </div>
-                )} */}
-              </>
+              <SortableTreeItem
+                key={uuid}
+                id={id}
+                value={id}
+                uuid={uuid}
+                color={color}
+                name={name}
+                depth={id === activeId && projected ? projected.depth : depth}
+                indentationWidth={indentationWidth}
+                indicator={indicator}
+                collapsed={Boolean(collapsed && children.length)}
+                onCollapse={
+                  collapsible && children.length
+                    ? () => handleCollapse(id)
+                    : undefined
+                }
+                sectionID={sectionID}
+                onRemove={removable ? () => handleRemove(id) : undefined}
+              />
             );
           }
         )}
@@ -376,13 +365,11 @@ export function SortableTree({
           (item: any) => item.uuid === activeTreeItem.uuid
         ) ?? 0;
       try {
-        console.log(demo1);
         const res = await kioskApi.updateSectionItemPosition(
           activeTreeItem!.uuid,
           sectionID,
           positoin
         );
-        console.log(res);
       } catch (error) {
         console.log;
       }

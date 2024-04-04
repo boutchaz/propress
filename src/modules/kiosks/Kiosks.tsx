@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import useKiosks from "@/hooks/useKiosks";
 import { Kiosk } from "@/types/Kiosk";
-import { Eye, Trash } from "lucide-react";
+import { Eye } from "lucide-react";
 import {
   createColumnHelper,
   flexRender,
@@ -88,7 +88,7 @@ const Kiosks = () => {
                         )}
                   </TableHead>
                 ))}
-                <TableHead className="flex justify-center items-center">
+                <TableHead className="flex justify-center items-center" key="actions">
                   Actions
                 </TableHead>
               </TableRow>
@@ -118,11 +118,7 @@ const Kiosks = () => {
                         });
                       }}
                     >
-                      {/* {row.original} */}
                       <Eye />
-                    </Button>
-                    <Button variant="ghost">
-                      <Trash />
                     </Button>
                   </TableCell>
                 </TableRow>

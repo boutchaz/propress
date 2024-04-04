@@ -9,6 +9,8 @@ interface Props extends TreeItemProps {
   id: string;
   uuid: string;
   color: string;
+  sectionID: string;
+  name: string;
 }
 
 const animateLayoutChanges: AnimateLayoutChanges = ({
@@ -16,7 +18,7 @@ const animateLayoutChanges: AnimateLayoutChanges = ({
   wasDragging,
 }) => (isSorting || wasDragging ? false : true);
 
-export function SortableTreeItem({ id, depth, uuid, color, ...props }: Props) {
+export function SortableTreeItem({ id, depth, uuid, color,sectionID,name, ...props }: Props) {
   const {
     attributes,
     isDragging,
@@ -48,8 +50,10 @@ export function SortableTreeItem({ id, depth, uuid, color, ...props }: Props) {
         ...attributes,
         ...listeners,
       }}
+      sectionID={sectionID}
       uuid={uuid}
       color={color}
+      name={name}
       {...props}
     />
   );

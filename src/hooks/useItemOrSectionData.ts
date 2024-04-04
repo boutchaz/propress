@@ -7,7 +7,6 @@ export const useItemOrSectionData = (itemId: ItemId) => {
   // Split the itemId and check if the prefix is "section"
   const isSection = itemId?.split("_")[0] === "section";
   const queryKey: String[] = isSection ? ["section", itemId] : ["item", itemId];
-  console.log(queryKey);
   const fetchData = async () => {
     if (isSection) {
       // If it's a section, call the section API

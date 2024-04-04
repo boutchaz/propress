@@ -22,6 +22,8 @@ export interface Props extends HTMLAttributes<HTMLLIElement> {
   value: string;
   uuid?: string;
   color?: string;
+  sectionID?: string;
+  name?: string;
   onCollapse?(): void;
   onRemove?(): void;
   wrapperRef?(node: HTMLLIElement): void;
@@ -47,6 +49,8 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
       wrapperRef,
       uuid,
       color,
+      sectionID,
+      name,
       ...props
     },
     ref
@@ -54,11 +58,11 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
     const { toggle, setItemId } = useDrawerStore();
 
     const handleUpdate = () => {
-      setItemId(depth ? `item_${uuid}` : `section_${uuid}`);
+      setItemId(depth ? `item_${uuid}_${sectionID}` : `section_${uuid}`);
       toggle(); // This assumes toggle is the correct method to use
     };
     const handleInsert = () => {
-      setItemId("item_new");
+      setItemId(`item_new_${sectionID}`);
       toggle(); // This assumes toggle is the correct method to use
     };
     return (
@@ -94,14 +98,14 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
             className="flex-grow pl-2 whitespace-nowrap overflow-hidden text-ellipsis"
             style={{ color: color }}
           >
-            {value}
+            {name}
           </span>
           {depth === 0 && (
-            <Button variant="ghost" onClick={handleInsert}>
+            <Button variant="ghost" onClick={handleInsert} className="dark:text-dark">
               <CirclePlus />
             </Button>
           )}
-          <Button variant="ghost" onClick={handleUpdate}>
+          <Button variant="ghost" onClick={handleUpdate}  className="dark:text-dark">
             <SquarePen />
           </Button>
           {/* {!clone && onRemove && <Remove onClick={onRemove} />} */}

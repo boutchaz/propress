@@ -6,7 +6,16 @@ import { Section } from "@/types/Section";
 
 export default {
   login: async (username: string, password: string) => {
-    const response = await API.post("/login", { username, password });
+    const response = await API.post(
+      "/login",
+      { username, password }
+      // {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "Access-Control-Allow-Origin": "*",
+      //   },
+      // }
+    );
     return response.data;
   },
   getKiosks: async (pageParam: number) => {
@@ -59,6 +68,24 @@ export default {
   },
   createSection: async (data: Pick<Section, "icon" | "color" | "position">) => {
     const response = await API.post(`/kiosk_sections`, data);
+    return response.data;
+  },
+  updateSectionItem: async (itemId: string, data: any) => {
+    const response = await API.patch(`/kiosk_section_items/${itemId}`, data, {
+      headers: {
+        "Content-Type": "application/merge-patch+json",
+      },
+    });
+    return response.data;
+  },
+  createItem: async (data: any) => {
+    const response = await API.post(`/kiosk_section_items`, data);
+    return response.data;
+  },
+  getPublications: async (search: string) => {
+    const response = await API.get(`/publications`, {
+      params: { name: search, page: 1, "order[publisher.name]": "asc" },
+    });
     return response.data;
   },
 };

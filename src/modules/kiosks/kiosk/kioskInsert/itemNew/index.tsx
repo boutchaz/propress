@@ -14,30 +14,31 @@ import kioskApi from "@/api/kioskApi";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { useDrawerStore } from "@/hooks/useDrawer";
 import { Route } from "@/routes/kiosks.$kiosId";
+import { PublicationsPicker } from "@/components/publications";
 
 const itemSchema = z.object({
-  name: z.string(),
   ojdTag: z.string().optional(),
-  position: z.number().optional(),
+  position: z.number().int().positive().optional(),
   releaseOffset: z.number().nullable().optional(),
   goalFixedUpon: z.number().nullable().optional(),
-  issue: z.string().nullable().optional(),
-  publication: z.string().nullable().optional(),
-  color: z.string().nullable().optional(),
+  publication: z.object({
+    value: z.string(),
+  }),
 });
 
 type FormValues = z.infer<typeof itemSchema>;
 
 export const ItemNew = ({ refetch }: { refetch: () => void }) => {
-  const { close, setItemId } = useDrawerStore();
+  const { close, setItemId, itemId } = useDrawerStore();
+
   const { kiosId } = Route.useParams();
   const methods = useForm<FormValues>({
     resolver: zodResolver(itemSchema),
   });
   const queryClient = new QueryClient();
   const mutation = useMutation({
-    mutationFn: async (data: FormValues & { kiosk: string }) => {
-      await kioskApi.createSection(data);
+    mutationFn: async (data: FormValues & { section: string }) => {
+      await kioskApi.createItem(data);
     },
     onSuccess: async () => {
       close();
@@ -46,8 +47,16 @@ export const ItemNew = ({ refetch }: { refetch: () => void }) => {
       setItemId(null);
     },
   });
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    mutation.mutate({ ...data, kiosk: `/api/kiosks/${kiosId}` });
+  const onSubmit: SubmitHandler<FormValues> = (data: any) => {
+    const sectionID = itemId?.split("_")[2];
+    const submissionData = {
+      ...data,
+      publication: data.publication ? data.publication?.value : null,
+    };
+    mutation.mutate({
+      ...submissionData,
+      section: `/api/kiosk/sections/${sectionID}`,
+    });
   };
   useEffect(() => {
     const elements = document.querySelectorAll(
@@ -63,11 +72,12 @@ export const ItemNew = ({ refetch }: { refetch: () => void }) => {
         <div className="grid grid-cols-2 gap-4 my-8" data-vaul-no-drag>
           <Controller
             data-vaul-no-drag
-            name="name"
+            name="publication"
             control={methods.control}
             render={({ field, fieldState: { error } }) => (
-              <div className="flex flex-col gap-1">
-                <Input {...field} placeholder="Name" />
+              <div className="flex flex-col">
+                <PublicationsPicker field={field} />
+
                 {error && <p className="text-red-500">{error.message}</p>}
               </div>
             )}
@@ -132,22 +142,6 @@ export const ItemNew = ({ refetch }: { refetch: () => void }) => {
               </div>
             )}
           />
-          <div data-vaul-no-drag className="w-full">
-            <Controller
-              data-vaul-no-drag
-              name="color"
-              control={methods.control}
-              render={({ field }) => (
-                <div data-vaul-no-drag className="w-full flex gap-8 flex-col">
-                  <Sketch
-                    data-vaul-no-drag
-                    style={{ marginLeft: 20 }}
-                    onChange={(color) => field.onChange(color.hex)}
-                  />
-                </div>
-              )}
-            />
-          </div>
         </div>
         <div
           data-vaul-no-drag

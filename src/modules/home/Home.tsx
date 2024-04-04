@@ -1,15 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "@tanstack/react-router";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/components/ui/navigation-menu";
+import { useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,9 +11,16 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layout } from "@/components/layout";
+import { useEffect } from "react";
 
 const Home = () => {
   const { authState } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    router.navigate({
+      to: "/kiosks",
+    });
+  }, []);
   return (
     <Layout>
       <ScrollArea className="h-full">
