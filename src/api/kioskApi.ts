@@ -6,18 +6,24 @@ import { Section } from "@/types/Section";
 
 export default {
   login: async (username: string, password: string) => {
-    const response = await API.post(
+    const response = await fetch(
       "/login",
-      { username, password },
       {
+        method: 'POST',
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "POST",
         },
+        body: JSON.stringify({ username, password })
       }
     );
-    return response.data;
+  
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  
+    return response.json();
   },
   getKiosks: async (pageParam: number) => {
     const response = await API.get<Kiosk[]>(
