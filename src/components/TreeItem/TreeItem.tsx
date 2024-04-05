@@ -7,6 +7,7 @@ import { ChevronDown } from "lucide-react";
 import { cn, hexToRgb } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useDrawerStore } from "@/hooks/useDrawer";
+import classNames from "classnames";
 
 export interface Props extends HTMLAttributes<HTMLLIElement> {
   childCount?: number;
@@ -67,7 +68,14 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
     };
     return (
       <li
-        className={`list-none box-border mb-[-1px] pl-[var(--spacing)] ${clone ? "inline-block pointer-events-none p-0 ml-2.5 mt-1.25" : ""}`}
+        className={classNames(
+          styles.Wrapper,
+          clone && styles.clone,
+          ghost && styles.ghost,
+          indicator && styles.indicator,
+          disableSelection && styles.disableSelection,
+          disableInteraction && styles.disableInteraction
+        )}
         ref={wrapperRef}
         {...props}
         style={
@@ -86,9 +94,14 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
           <GripHorizontal {...handleProps} />
           {onCollapse && (
             <Action
-              onClick={onCollapse}
-              className={cn(
-                `transition-transform duration-250 ease-in-out mx-4 ${collapsed ? "transform rotate-[-90deg]" : ""}`
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onCollapse();
+              }}
+              className={classNames(
+                styles.Collapse,
+                collapsed && styles.collapsed
               )}
             >
               <ChevronDown />
@@ -101,11 +114,19 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
             {name}
           </span>
           {depth === 0 && (
-            <Button variant="ghost" onClick={handleInsert} className="dark:text-dark">
+            <Button
+              variant="ghost"
+              onClick={handleInsert}
+              className="dark:text-dark"
+            >
               <CirclePlus />
             </Button>
           )}
-          <Button variant="ghost" onClick={handleUpdate}  className="dark:text-dark">
+          <Button
+            variant="ghost"
+            onClick={handleUpdate}
+            className="dark:text-dark"
+          >
             <SquarePen />
           </Button>
           {/* {!clone && onRemove && <Remove onClick={onRemove} />} */}
